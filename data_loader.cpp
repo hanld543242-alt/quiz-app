@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cctype>
 
+using namespace std;
+
 string trim(const string& str) {
     size_t first = str.find_first_not_of(" \t\r\n");
     if (string::npos == first) return "";
@@ -13,7 +15,7 @@ string trim(const string& str) {
 
 vector<Question> DataLoader::loadData(const string& filename) {
     vector<Question> questions;
-    ifstream file(filename); 
+    ifstream file(filename);
 
     if (!file.is_open()) {
         cerr << "[Lỗi] Không thể mở file dữ liệu: " << filename << endl;
@@ -21,51 +23,47 @@ vector<Question> DataLoader::loadData(const string& filename) {
     }
 
     string line;
-    
     while (getline(file, line)) {
         line = trim(line);
         if (line.empty()) continue;
+
         if (isdigit(line[0]) && line.find("-->") == string::npos) {
-            break; 
-        }
-    }
+            stringstream ss(line);
+            int q_id;
+            ss >> q_id;
+            
+            string q_text;
+            getline(ss, q_text);
+            q_text = trim(q_text);
 
-    while (!file.eof() && !line.empty()) {
-        stringstream ss(line); 
-        int q_id;
-        ss >> q_id; 
-        
-        string q_text;
-        getline(ss, q_text);
-        q_text = trim(q_text); 
+            vector<string> q_options;
+            char q_answer = ' ';
+            string sub_line;
 
-        getline(file, line); 
-        line = trim(line);
-        if (line.find("-->") != string::npos || (line.size() == 1 && isdigit(line[0]))) {
-            getline(file, line);
-            line = trim(line);
-        }
+            while (getline(file, sub_line)) {
+                sub_line = trim(sub_line);
+                if (sub_line.empty()) continue;
 
-        vector<string> q_options;
-        stringstream option_ss(line);
-        string single_option;
-        while (option_ss >> single_option) {
-            q_options.push_back(single_option);
-        }
+                if (sub_line.find("-->") != string::npos && sub_line.find_first_not_of("0123456789--> ") != string::npos) {
+                    continue; 
+                }
+                if (sub_line.size() == 1 && isdigit(sub_line[0])) {
+                    continue; 
+                }
 
-        char q_answer = ' ';
-        if (getline(file, line)) {
-            line = trim(line);
-            if (!line.empty()) {
-                q_answer = tolower(line[0]); 
+                if (sub_line.size() == 1 && isalpha(sub_line[0])) {
+                    q_answer = tolower(sub_line[0]);
+                    break; 
+                }
+
+                stringstream option_ss(sub_line);
+                string token;
+                while (option_ss >> token) {
+                    q_options.push_back(token);
+                }
             }
-        }
 
-        questions.push_back(Question(q_id, q_text, q_options, q_answer));
-
-        while (getline(file, line)) {
-            line = trim(line);
-            if (!line.empty()) break; 
+            questions.push_back(Question(q_id, q_text, q_options, q_answer));
         }
     }
 
@@ -74,17 +72,23 @@ vector<Question> DataLoader::loadData(const string& filename) {
 }
 
 void DataLoader::printQuestions(const vector<Question>& questions) {
-    cout << "============= KẾT QUẢ BÓC TÁCH DỮ LIỆU FILE =============" << endl;
+    cout << "\n========================================================" << endl;
+    cout << "       KẾT QUẢ NGHIỆM THU DỮ LIỆU FEATURE/DATA-LOADER     " << endl;
+    cout << "========================================================" << endl;
+    cout << ">>> Tổng số câu hỏi đọc được từ file: " << questions.size() << " câu. <<<\n" << endl;
+
     for (const auto& q : questions) {
-        cout << "Câu hỏi số: " << q.getId() << endl;
-        cout << "Nội dung:   " << q.getQuestionText() << endl;
-        cout << "Danh sách đáp án (vector):" << endl;
+        cout << "--------------------------------------------------------" << endl;
+        cout << " CÂU HỎI SỐ " << q.getId() << ":" << endl;
+        cout << "   Nội dung: " << q.getQuestionText() << endl;
+        cout << "   Danh sách các lựa chọn đáp án:" << endl;
         
         auto opts = q.getOptions();
         for (size_t i = 0; i < opts.size(); ++i) {
-            cout << "  [" << (char)('a' + i) << "] " << opts[i] << endl;
+            cout << "     [" << (char)('a' + i) << "] " << opts[i] << endl;
         }
-        cout << "=> Ký tự đáp án đúng bóc tách được: " << q.getCorrectAnswer() << endl;
-        cout << "--------------------------------------------------------" << endl;
+        
+        cout << "   => CHỌN RA ĐÁP ÁN ĐÚNG: " << q.getCorrectAnswer() << endl;
     }
+    cout << "========================================================\n" << endl;
 }
