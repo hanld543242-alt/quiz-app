@@ -1,94 +1,61 @@
 #include "data_loader.h"
 #include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <cctype>
+#include <iostream>
 
 using namespace std;
 
-string trim(const string& str) {
-    size_t first = str.find_first_not_of(" \t\r\n");
-    if (string::npos == first) return "";
-    size_t last = str.find_last_not_of(" \t\r\n");
-    return str.substr(first, (last - first + 1));
-}
-
 vector<Question> DataLoader::loadData(const string& filename) {
-    vector<Question> questions;
-    ifstream file(filename);
+vector<Question> questions;
+ifstream file(filename);
 
-    if (!file.is_open()) {
-        cerr << "[Lỗi] Không thể mở file dữ liệu: " << filename << endl;
-        return questions;
+if (!file.is_open()) {
+    cerr << "[Lỗi] Không thể mở file dữ liệu!" << endl;
+return questions;
     }
 
-    string line;
-    while (getline(file, line)) {
-        line = trim(line);
-        if (line.empty()) continue;
+int q_id;
+while (file >> q_id) {
+    file.ignore(); 
 
-        if (isdigit(line[0]) && line.find("-->") == string::npos) {
-            stringstream ss(line);
-            int q_id;
-            ss >> q_id;
-            
-            string q_text;
-            getline(ss, q_text);
-            q_text = trim(q_text);
+string q_text;
+    getline(file, q_text);
+int num_options;
+    file >> num_options;
 
-            vector<string> q_options;
-            char q_answer = ' ';
-            string sub_line;
-
-            while (getline(file, sub_line)) {
-                sub_line = trim(sub_line);
-                if (sub_line.empty()) continue;
-
-                if (sub_line.find("-->") != string::npos && sub_line.find_first_not_of("0123456789--> ") != string::npos) {
-                    continue; 
-                }
-                if (sub_line.size() == 1 && isdigit(sub_line[0])) {
-                    continue; 
-                }
-
-                if (sub_line.size() == 1 && isalpha(sub_line[0])) {
-                    q_answer = tolower(sub_line[0]);
-                    break; 
-                }
-
-                stringstream option_ss(sub_line);
-                string token;
-                while (option_ss >> token) {
-                    q_options.push_back(token);
-                }
-            }
-
-            questions.push_back(Question(q_id, q_text, q_options, q_answer));
+vector<string> q_options;
+for (int i = 0; i < num_options; ++i) {
+string option;
+    file >> option;
+    q_options.push_back(option);
         }
-    }
 
+char q_answer;
+    file >> q_answer;
+    questions.push_back(Question(q_id, q_text, q_options, q_answer));
+    }
     file.close();
-    return questions;
+return questions;
 }
 
 void DataLoader::printQuestions(const vector<Question>& questions) {
     cout << "\n========================================================" << endl;
-    cout << "       KẾT QUẢ NGHIỆM THU DỮ LIỆU FEATURE/DATA-LOADER     " << endl;
+    
+    cout << ">>> TỔNG SỐ CÂU HỎI ĐỌC ĐƯỢC: " << questions.size() << " CÂU. <<<\n" << endl;
+    
     cout << "========================================================" << endl;
-    cout << ">>> Tổng số câu hỏi đọc được từ file: " << questions.size() << " câu. <<<\n" << endl;
-
+    
     for (const auto& q : questions) {
-        cout << "--------------------------------------------------------" << endl;
         cout << " CÂU HỎI SỐ " << q.getId() << ":" << endl;
         cout << "   Nội dung: " << q.getQuestionText() << endl;
-        cout << "   Danh sách các lựa chọn đáp án:" << endl;
+        cout << "   Các lựa chọn:" << endl;
         
-        auto opts = q.getOptions();
+        vector<string> opts = q.getOptions();
         for (size_t i = 0; i < opts.size(); ++i) {
-            cout << "     [" << (char)('a' + i) << "] " << opts[i] << endl;
+            char label = 'a' + i; 
+            cout << "     [" << label << "] " << opts[i] << endl;
         }
         
-        cout << "   => CHỌN RA ĐÁP ÁN ĐÚNG: " << q.getCorrectAnswer() << endl;
+        cout << "   => ĐÁP ÁN ĐÚNG: " << q.getCorrectAnswer() << endl;
+        cout << "--------------------------------------------------------" << endl;
     }
-    cout << "========================================================\n" << endl;
 }
