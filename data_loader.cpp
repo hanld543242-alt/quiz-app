@@ -16,19 +16,19 @@ vector<Question> DataLoader::loadData(const string& filename) {
 
     int totalQuestions;
     if (file >> totalQuestions) {
-        file.ignore();
+        file.ignore(1000, '\n');
     }
     
     int q_id;
     while (file >> q_id) {
-        file.ignore(); 
+        file.ignore(1000, '\n'); 
 
         string q_text;
         getline(file, q_text);
 
         int num_options;
         file >> num_options;
-        file.ignore();
+        file.ignore(1000, '\n');
 
         vector<string> q_options;
         string line_options;
@@ -41,7 +41,7 @@ vector<Question> DataLoader::loadData(const string& filename) {
         }
         char q_answer;
         file >> q_answer;
-        file.ignore();
+        file.ignore(1000, '\n');
 
         questions.push_back(Question(q_id, q_text, q_options, q_answer));
     }
