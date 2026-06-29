@@ -13,24 +13,29 @@ vector<Question> DataLoader::loadData(const string& filename) {
         return questions;
     }
 
+    int totalQuestions;
+    if (file >> totalQuestions) {
+        file.ignore();
+    }
+    
     int q_id;
     while (file >> q_id) {
         file.ignore(); 
 
-    string q_text;
+        string q_text;
         getline(file, q_text);
 
-     int num_options;
+        int num_options;
         file >> num_options;
 
-    vector<string> q_options;
-         for (int i = 0; i < num_options; ++i) {
-     string option;
+        vector<string> q_options;
+        for (int i = 0; i < num_options; ++i) {
+            string option;
             file >> option; 
             q_options.push_back(option);
         }
 
-    char q_answer;
+        char q_answer;
         file >> q_answer;
 
         questions.push_back(Question(q_id, q_text, q_options, q_answer));
@@ -42,22 +47,22 @@ vector<Question> DataLoader::loadData(const string& filename) {
 
 void DataLoader::printQuestions(const vector<Question>& questions) {
     cout << "\n========================================================" << endl;
-    
+
     cout << ">>> TỔNG SỐ CÂU HỎI ĐỌC ĐƯỢC TỪ FILE: " << questions.size() << " CÂU. <<<\n" << endl;
-    
+
     cout << "========================================================" << endl;
 
     for (const auto& q : questions) {
         cout << " CÂU HỎI SỐ " << q.getId() << ":" << endl;
         cout << "   Nội dung: " << q.getQuestionText() << endl;
         cout << "   Các lựa chọn:" << endl;
-        
+
         vector<string> opts = q.getOptions();
         for (size_t i = 0; i < opts.size(); ++i) {
-            char label = 'a' + i; 
+            char label = 'a' + i;
             cout << "     [" << label << "] " << opts[i] << endl;
         }
-        
+
         cout << "   => ĐÁP ÁN ĐÚNG: " << q.getCorrectAnswer() << endl;
         cout << "--------------------------------------------------------" << endl;
     }
