@@ -5,45 +5,48 @@
 using namespace std;
 
 vector<Question> DataLoader::loadData(const string& filename) {
-vector<Question> questions;
-ifstream file(filename);
+    vector<Question> questions;
+    ifstream file(filename);
 
-if (!file.is_open()) {
-    cerr << "[Lỗi] Không thể mở file dữ liệu!" << endl;
-return questions;
+    if (!file.is_open()) {
+        cerr << "[Lỗi] Không thể mở file dữ liệu!" << endl;
+        return questions;
     }
 
-int q_id;
-while (file >> q_id) {
-    file.ignore(); 
+    int q_id;
+    while (file >> q_id) {
+        file.ignore(); 
 
-string q_text;
-    getline(file, q_text);
-int num_options;
-    file >> num_options;
+    string q_text;
+        getline(file, q_text);
 
-vector<string> q_options;
-for (int i = 0; i < num_options; ++i) {
-string option;
-    file >> option;
-    q_options.push_back(option);
+     int num_options;
+        file >> num_options;
+
+    vector<string> q_options;
+         for (int i = 0; i < num_options; ++i) {
+     string option;
+            file >> option; 
+            q_options.push_back(option);
         }
 
-char q_answer;
-    file >> q_answer;
-    questions.push_back(Question(q_id, q_text, q_options, q_answer));
+    char q_answer;
+        file >> q_answer;
+
+        questions.push_back(Question(q_id, q_text, q_options, q_answer));
     }
+
     file.close();
-return questions;
+    return questions;
 }
 
 void DataLoader::printQuestions(const vector<Question>& questions) {
     cout << "\n========================================================" << endl;
     
-    cout << ">>> TỔNG SỐ CÂU HỎI ĐỌC ĐƯỢC: " << questions.size() << " CÂU. <<<\n" << endl;
+    cout << ">>> TỔNG SỐ CÂU HỎI ĐỌC ĐƯỢC TỪ FILE: " << questions.size() << " CÂU. <<<\n" << endl;
     
     cout << "========================================================" << endl;
-    
+
     for (const auto& q : questions) {
         cout << " CÂU HỎI SỐ " << q.getId() << ":" << endl;
         cout << "   Nội dung: " << q.getQuestionText() << endl;
