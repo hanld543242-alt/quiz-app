@@ -17,7 +17,6 @@ public:
     Question() : id(0), correct_answer(' ') {}
     Question(int id, const string& text, const vector<string>& opts, char answer)
         : id(id), question_text(text), options(opts), correct_answer(answer) {}
-
     int getId() const { return id; }
     string getQuestionText() const { return question_text; }
     vector<string> getOptions() const { return options; }
