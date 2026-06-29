@@ -1,6 +1,7 @@
 #include "data_loader.h"
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -30,12 +31,14 @@ vector<Question> DataLoader::loadData(const string& filename) {
         file.ignore();
 
         vector<string> q_options;
-        for (int i = 0; i < num_options; ++i) {
-            string option;
-            file >> option; 
-            q_options.push_back(option);
+        string line_options;
+        if (getline( file, line_options)){ 
+            stringstream ss(line_options);
+            string options;
+            while (ss >> options ){
+                q_options.push_back(options);
+            }
         }
-
         char q_answer;
         file >> q_answer;
         file.ignore();
